@@ -9,7 +9,7 @@
     <ListView
         android:id="@+id/lstMain"
         android:layout_width="360dp"
-        android:layout_height="480dp"
+        android:layout_height="420dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="17dp" />

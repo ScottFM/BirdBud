@@ -2,6 +2,7 @@ package com.example.scott.birdbud;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.app.ActivityCompat;
@@ -23,12 +24,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static CustomAdapter adapter;
     ListView lv;
     DatabaseAccess access = new DatabaseAccess(this);
+    SharedPreferences s;
+    SharedPreferences.Editor e;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
+
+        s = getSharedPreferences("BIRDS", 0);
+        e = s.edit();
 
         lv = (ListView) findViewById(R.id.lstMain);
 
@@ -46,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ArrayList<BirdEntry> tempList = access.getBirdEntries();
         for (int i = 0; i < tempList.size(); i++) {
             int image = tempList.get(i).getImageId();
-            String name = tempList.get(i).getText();
+            String name = tempList.get(i).getName();
             addViewToList(new BirdEntry(image, name));
         }
 
@@ -56,7 +62,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 BirdEntry entry = entryArray.get(position);
 
-                Toast.makeText(MainActivity.this, "You clicked on " + entry.getText(), Toast.LENGTH_SHORT).show();
+                e.putString("bird", entry.getName());
+                e.commit();
+
+                Intent I = new Intent("com.example.Scott.Database.BirdInfo");
+                startActivity(I);
+
+                Toast.makeText(MainActivity.this, "You clicked on " + entry.getName(), Toast.LENGTH_SHORT).show();
 
             }
         });

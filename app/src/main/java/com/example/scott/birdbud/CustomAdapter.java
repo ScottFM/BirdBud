@@ -35,11 +35,9 @@ public class CustomAdapter extends ArrayAdapter<BirdEntry>{
         TextView text = (TextView) convertView.findViewById(R.id.textView);
         ImageView image = (ImageView) convertView.findViewById(R.id.imageView);
         // Populate the data into the template view using the data object
-        text.setText(entry.getText());
-        if (entry.getImageId() != -1)
-            image.setImageResource(entry.getImageId());
-        else
-            image.setImageURI(entry.getUri());
+        text.setText(entry.getName());
+        image.setImageResource(entry.getImageId());
+
         // Return the completed view to render on screen
         return convertView;
 
