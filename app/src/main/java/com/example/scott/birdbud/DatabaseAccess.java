@@ -17,8 +17,9 @@ import java.util.List;
 public class DatabaseAccess extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "BirdBud.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 19;
     private static final String tableInfo = "birdinfo";
+    private static final String tableMarkers = "mapmarkers";
 
     SQLiteDatabase db;
 
@@ -31,14 +32,29 @@ public class DatabaseAccess extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + tableInfo + " (name text primary key not null , "
                 + "image integer not null , sname text , call integer , about text );");
+        db.execSQL("create table if not exists " + tableMarkers + " (name text not null , "
+                + "xval text not null , yval text not null , date text not null , notes text);");
+
         BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "American Goldfinch", "Spinus Tristus", "A small finch with a short, conical bill and a small head, long wings, and short, notched tail. \n\nThe goldfinch’s main natural habitats are weedy fields and floodplains, where plants such as thistles and asters are common. \n\nAmerican goldfinches are the state bird of New Jersey, Washington, and Iowa.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+        //BirdEntry goldfinch = new BirdEntry(R.drawable.goldfinch, R.raw.goldfinch, "Default name", "Default Scientific", "Default bio. \n\nDefault habitat. \n\nDefault fun fact.");
+
+        //Marker victor = new Marker("American Goldfinch", 41.7317, -92.2980);
+
         addBird(goldfinch, db);
+        //addMarker(victor, db);
         this.db = db;
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + tableInfo);
+        db.execSQL("DROP TABLE IF EXISTS " + tableMarkers);
         this.onCreate(db);
     }
 
@@ -143,6 +159,75 @@ public class DatabaseAccess extends SQLiteOpenHelper {
         infoList.add(sName);
         about = cursor.getString(1);
         infoList.add(about);
+
+        cursor.close();
+        db.close();
+        return infoList;
+    }
+
+    /* Used to test database
+    //Call this to hard-code add markers. Will take other version to dynamically add
+    public void addMarker(Marker m, SQLiteDatabase db)
+    {
+        //db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        db.rawQuery("select * from " + tableMarkers, null);
+
+        values.put("name", m.getName());
+        values.put("xval", m.getXval());
+        values.put("yval", m.getYval());
+
+        db.insert(tableMarkers, null, values);
+    }*/
+
+    //This function would be used to add entries to database from user side
+    public long addMarker(Marker m)
+    {
+
+        db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        db.rawQuery("select * from " + tableMarkers, null);
+
+        values.put("name", m.getName());
+        values.put("xval", m.getXval());
+        values.put("yval", m.getYval());
+        values.put("date", m.getDate());
+        values.put("notes", m.getNotes());
+
+        db.insert(tableMarkers, null, values);
+
+        //Do not add if there is already an instance of that username
+        long conflict = db.insertWithOnConflict(tableMarkers, null,  values ,SQLiteDatabase.CONFLICT_IGNORE);
+
+        db.close();
+
+        return conflict;
+    }
+
+
+    public ArrayList<Marker> getMarkers(String name)
+    {
+        db = this.getReadableDatabase();
+        ArrayList<Marker> infoList = new ArrayList<Marker>();
+
+        Cursor cursor = db.rawQuery("select xval , yval , date , notes from "+ tableMarkers + " where TRIM(name) = '" + name.trim() + "'", null);
+        cursor.moveToFirst();
+
+        if (cursor.moveToFirst())
+        {
+            do {
+                String xval = cursor.getString(0);
+                String yval = cursor.getString(1);
+                String date = cursor.getString(2);
+                String notes = cursor.getString(3);
+
+                Marker m = new Marker(name, xval, yval, date, notes);
+                infoList.add(m);
+            }
+            while (cursor.moveToNext());
+        }
 
         cursor.close();
         db.close();

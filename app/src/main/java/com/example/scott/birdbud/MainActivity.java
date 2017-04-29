@@ -39,6 +39,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lv = (ListView) findViewById(R.id.lstMain);
 
         makeAndFillListView();
+
+        if ((ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
+                (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+        }
     }
 
     public void makeAndFillListView() {
@@ -67,9 +72,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 Intent I = new Intent("com.example.Scott.Database.BirdInfo");
                 startActivity(I);
-
-                Toast.makeText(MainActivity.this, "You clicked on " + entry.getName(), Toast.LENGTH_SHORT).show();
-
             }
         });
     }
