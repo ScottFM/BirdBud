@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Bird Bud</string>
+    <string name="google_android_map_api_key">AIzaSyAe_5yYHskU1XrDpM38uh2Io21OBwM-kJQ</string>
 </resources>

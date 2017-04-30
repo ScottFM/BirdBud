@@ -43,11 +43,11 @@ import java.util.Locale;
  * Created by Scott on 4/27/2017.
  */
 
-public class BirdInfo extends AppCompatActivity implements View.OnClickListener, DialogInterface.OnDismissListener {
+public class BirdInfo extends AppCompatActivity implements View.OnClickListener{
 
     ImageView img;
     TextView txtName, txtSName, txtAbout;
-    Button bCall, bMap, bEntry;
+    Button bCall, bMap, bEntry, bClear;
 
     int imageId;
     String name;
@@ -93,7 +93,9 @@ public class BirdInfo extends AppCompatActivity implements View.OnClickListener,
         bMap.setText("View " + name + " markers");
         bEntry = (Button) findViewById(R.id.btnEntry);
         bEntry.setOnClickListener(this);
-        bEntry.setText("Add new " + name + " marker");
+
+        bClear = (Button) findViewById(R.id.btnClear);
+        bClear.setOnClickListener(this);
     }
 
     private void assignInfo() {
@@ -268,8 +270,16 @@ public class BirdInfo extends AppCompatActivity implements View.OnClickListener,
                 break;
 
             case R.id.btnMap:
-                Intent I2 = new Intent("com.example.Scott.Database.MapsActivity");
-                startActivity(I2);
+                ArrayList<Marker> allMarkers = access.getMarkers(name);
+
+                if(allMarkers.size() == 0)
+                {
+                    Toast.makeText(this, "No existing markers for " + name, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Intent I2 = new Intent("com.example.Scott.Database.MapsActivity");
+                    startActivity(I2);
+                }
 
                 break;
 
@@ -283,8 +293,16 @@ public class BirdInfo extends AppCompatActivity implements View.OnClickListener,
 
                 //Get notes
                 AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-                alertDialog.setOnDismissListener(this);
-                alertDialog.setTitle("Write a note:");
+                alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        Marker m = new Marker(name, x, y, formattedDate, notes);
+                        access.addMarker(m);
+                        Toast.makeText(getApplicationContext(), "New marker added! Check it in the map!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                alertDialog.setTitle("Add an entry for "+name);
+                alertDialog.setMessage("Write a note:");
 
                 final EditText input = new EditText(this);
                 alertDialog.setView(input);
@@ -300,14 +318,40 @@ public class BirdInfo extends AppCompatActivity implements View.OnClickListener,
 
                 break;
 
+            case R.id.btnClear:
+                final boolean[] clear = {false};
+
+                //Get notes
+                AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(this);
+                alertDialog2.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        if (clear[0]) {
+                            access.removeMarkers(name);
+                            Toast.makeText(getApplicationContext(), "All markers for " + name + " removed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                alertDialog2.setTitle("Remove all markers for "+name+"?");
+
+                alertDialog2.setPositiveButton("Remove markers",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int which) {
+                                // Write your code here to execute after dialog
+                                clear[0] = true;
+                            }
+                        });
+                alertDialog2.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int which) {
+                                // Write your code here to execute after dialog
+                                clear[0] = false;
+                            }
+                        });
+
+                alertDialog2.show();
+                break;
+
         }
-    }
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-        Marker m = new Marker(name, x, y, formattedDate, notes);
-        access.addMarker(m);
-        Toast.makeText(this, "New marker added! Check it in the map!", Toast.LENGTH_SHORT).show();
-
     }
 }

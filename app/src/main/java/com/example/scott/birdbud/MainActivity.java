@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ArrayList<BirdEntry> entryArray;
     private static CustomAdapter adapter;
     ListView lv;
+    Button bMap;
     DatabaseAccess access = new DatabaseAccess(this);
     SharedPreferences s;
     SharedPreferences.Editor e;
@@ -31,12 +33,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        relativeLayout = (RelativeLayout) findViewById(R.id.relativeLayout);
+        relativeLayout = (RelativeLayout) findViewById(R.id.layout);
 
         s = getSharedPreferences("BIRDS", 0);
         e = s.edit();
 
         lv = (ListView) findViewById(R.id.lstMain);
+        bMap = (Button) findViewById(R.id.btnMap);
+        bMap.setOnClickListener(this);
 
         makeAndFillListView();
 
@@ -86,11 +90,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        /*switch (v.getId()) {
-            case R.id.btnAddView:
-                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, 444);
-                break;
-        }*/
+        switch (v.getId()) {
+            case R.id.btnMap:
+                ArrayList<Marker> allMarkers = access.getAllMarkers();
+
+                if(allMarkers.size() == 0)
+                {
+                    Toast.makeText(this, "No existing markers.", Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    e.putString("bird", "all");
+                    e.commit();
+                    Intent I2 = new Intent("com.example.Scott.Database.MapsActivity");
+                    startActivity(I2);
+                    break;
+                }
+        }
     }
 }
